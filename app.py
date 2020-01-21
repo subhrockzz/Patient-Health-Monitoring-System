@@ -31,7 +31,7 @@ def online():
         for line in lines:
             if len(line) > 1:
                 mydb = mysql.connector.connect(
-                host="10.14.79.58",
+                host="host_Ip_Address",
                 user="root",
                 passwd="12345",
                 database="PATIENT")
@@ -51,7 +51,7 @@ def online():
         session['mail']=mail
         passw = request.form["passw"]
         mydb = mysql.connector.connect(
-        host="10.14.79.58",
+        host="host_Ip_Address",
         user="root",
         passwd="12345",
         database="PATIENT")
@@ -68,7 +68,7 @@ def online():
             #session['loggedin'] = True
             #session["mail"] = account["Email"]
             mydb = mysql.connector.connect(
-            host="10.14.79.58",
+            host="host_Ip_Address",
             user="root",
             passwd="12345",
             database="PATIENT")
@@ -84,7 +84,7 @@ def online():
             #hashkey=str(mycursor.fetchone()[3]
             mydb.commit()
             mydb = mysql.connector.connect(
-            host="10.14.79.58",
+            host="host_Ip_Address",
             user="root",
             passwd="12345",
             database="PATIENT")
@@ -94,7 +94,7 @@ def online():
             age=str(mycursor.fetchone()[0])
             mydb.commit()
             mydb = mysql.connector.connect(
-            host="10.14.79.58",
+            host="host_Ip_Address",
             user="root",
             passwd="12345",
             database="PATIENT")
@@ -108,34 +108,7 @@ def online():
             f= open("P_INFO.txt","w+")
             f.write("%s,%s" % (gender,age))
 
-         
-            # Redirect to home page
-
-         
-           # while(1):
-        
-                #mydb = mysql.connector.connect(
-                #host="10.14.79.58",
-                #user="root",
-                #passwd="12345",
-                #database="PATIENT")
-
-                #mycursor = mydb.cursor()
-                #hashkey="1234"
-                #gender="Male"
-                #age="25"
-                #temp="98"
-                #hr="72"
-                #sys="67"
-                #dia="90"
-                #spo2="100"
-                #ci='5'
-                #PATIENT = "INSERT INTO MEDICAL_INFO (Hashkey,Gender,Age,Temperature,HeartRate,Systole,Diastole,Spo2,CriticalIndex) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s)"
-                #val = (hashkey,gender,age,temp,hr,sys,dia,spo2,ci)
-                #mycursor.execute(PATIENT, val)
-
-                #mydb.commit()
-
+   
 
 
             return render_template('details.html',name=name)
@@ -201,7 +174,7 @@ def register():
         for line in lines:
             if len(line) > 1:
                 mydb = mysql.connector.connect(
-                host="10.14.79.58",
+                host="host_Ip_Address",
                 port='3306',
                 user="root",
                 passwd="12345",
@@ -242,7 +215,7 @@ def register():
        
         #hashkey = x.hexdigest()
         mydb = mysql.connector.connect(
-        host="10.14.79.58",
+        host="host_Ip_Address",
         port='3306',
         user="root",
         passwd="12345",
@@ -280,19 +253,7 @@ def offlineregister():
 
 @app.route("/details")
 def details():
-    #if 'mail' in session: 
-        #email=session['mail']
-        #mydb = mysql.connector.connect(
-            #host="10.14.79.58",
-            #user="root",
-            #passwd="12345",
-            #database="PATIENT")
-
-        #mycursor = mydb.cursor()
-        #mycursor.execute('SELECT Name FROM PATIENT_INFO WHERE Fingerprint= %s', (mail, passw))
-        #name=str(mycursor.fetchone()[0])
-        #mydb.commit()
-
+   
     return render_template("details.html")
 @app.route("/offlinedetails")
 def offlinedetails():
@@ -302,7 +263,7 @@ def start():
     if 'mail' in session: 
         email=session['mail']
     mydb = mysql.connector.connect(
-    host="10.14.79.58",
+    host="host_Ip_Address",
     user="root",
     passwd="12345",
     database="PATIENT")
@@ -315,7 +276,7 @@ def start():
     mydb.commit()
 
     mydb = mysql.connector.connect(
-    host="10.14.79.58",
+    host="host_Ip_Address",
     user="root",
     passwd="12345",
     database="PATIENT")
@@ -328,7 +289,7 @@ def start():
     mydb.commit() 
 
     mydb = mysql.connector.connect(
-    host="10.14.79.58",
+    host="host_Ip_Address",
     user="root",
     passwd="12345",
     database="PATIENT")
@@ -342,7 +303,7 @@ def start():
     mydb.commit() 
  
     mydb = mysql.connector.connect(
-    host="10.14.79.58",
+    host="host_Ip_Address",
     user="root",
     passwd="12345",
     database="PATIENT")
@@ -369,7 +330,7 @@ def start():
     for line,line2,line3 in zip(lines,lines2,lines3):
         if len(line2) > 1:
             mydb = mysql.connector.connect(
-            host="10.14.79.58",
+            host="host_Ip_Address",
             user="root",
             passwd="12345",
             database="PATIENT")
@@ -776,7 +737,7 @@ def fingerdetails():
     #mail="sa@gmail.com"
     #passw="1234"
     mydb = mysql.connector.connect(
-    host="10.14.79.58",
+    host="10.14.79.5host_Ip_Address",
     user="root",
     passwd="12345",
     database="PATIENT")
@@ -790,7 +751,7 @@ def fingerdetails():
     mydb.commit()
     if account:
         mydb = mysql.connector.connect(
-        host="10.14.79.58",
+        host="host_Ip_Address",
         user="root",
         passwd="12345",
         database="PATIENT")
