@@ -1,0 +1,2 @@
+# Patient-Health-Monitoring-System
+Working on the model for building Patient Health Monitoring System which measures the Criticality Index of a Person in Ambulance by various parameters like Blood Pressure,Heart Rate,Blood Oxygen Level,Body Temperature and ECG(Person can see the Real Time graph of the parameters).It can automatically ping the Ambulance driver whenever the Patient will critical and Ambulance driver will get the nearby hospital list and Locations. The doctor can see the condition of the Patient from the Hospital also
