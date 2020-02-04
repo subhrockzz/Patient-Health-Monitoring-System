@@ -1,0 +1,117 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# vim: set ts=4 sw=4 et :
+#
+# grabserial - program to read a serial port and send the data to stdout
+#
+# Copyright 2006,2018 Sony Corporation
+#
+# This program is provided under the Gnu General Public License (GPL)
+# version 2 ONLY. This program is distributed WITHOUT ANY WARRANTY.
+# See the LICENSE file, which should have accompanied this program,
+# for the text of the license.
+#
+# 2019-09-03 by Tim Bird <tim.bird@sony.com>
+# 2006-09-07 by Tim Bird
+#
+# To do:
+#  * support interrupting capture with Ctrl-C
+#    * somewhere along the line, this feature got lost
+#    * (maybe check the exception handler and threading in the main loop?)
+#  * buffer output chars??
+#  * add optional value to -a to limit number of restarts?
+#  * restart based on received bytes?
+#
+# CHANGELOG:
+#  2019.09.03 - Version 1.9.9
+#   - fixed a bunch of pylint errors, and disabled some false positives
+#    with inline pylint directives
+#     - this included replacing some bare exceptions with UnicodeEncodeError
+#  2018.08.20 - Version 1.9.8
+#   - try to fix unicode handling (yet again)
+#     - some work based on pull request submitted by 'modbw' on github
+#   - handle EOFError during read_input, in case of pipe closure
+#  2018.01.03 - Version 1.9.6
+#   - add patches from Ilya Kuzmich to fix python3 issues,
+#   - update test.sh with python linters and other improvements
+#   - fix code to remove flake8 and pylint issues
+#  2017.06.13 - Version 1.9.5 - add -a to restart after time expired or
+#                               pattern matched.
+#                             - add strftime arguments to -o.
+#                             - add -Q to silence stdout when -o is active.
+#  2016.09.29 - Version 1.9.4 - add thread for sending user input to target
+#    by zqb-all on github
+#  2016.09.06 - clean up tabs, and add vim modeline for 4-column tabs
+#               grabserial should always run with python -tt grabserial
+#  2016.08.31 - add microsecond precision when using system Time (-T) option
+#  2016.08.30 - Version 1.9.3 - allow forcing the baudrate with -B
+#  2016.07.01 - Version 1.9.2 - change how version is stored
+#  2016.05.10 - Version 1.9.1 - allow skipping the tty check with -S
+#  2016.05.10 - Version 1.9.0 - support use as a python module
+#    Note that the main module routine will be grabserial.grab(args,[outputfd])
+#      where args is a list of command-line-style args
+#      as they would be passed using the standalone program.  e.g.
+#      grabserial.grab(None, ["-d", "/dev/ttyUSB0", "-v"])
+#      output from the serial port (with timing data) is sent to outputfd
+#  2015.04.23 - Version 1.8.1 - remove instructions for applying LICENSE text
+#    to new files, and add no-warranty language to grabserial.
+#  2015.03.10 - Version 1.8.0 - add -o option for saving output to a file
+#    add -T option for absolute times. Both contributed by ramaxlo
+#  2015.03.10 - Version 1.7.1 - add line feed to instantpat result line
+#  2014.09.28 - Version 1.7.0 - add option for force reset for USB serial
+#    contributed by John Mehaffey <mehaf@gedanken.com>
+#  2014.01.07 - Version 1.6.0 - add option for exiting based on a
+#    mid-line pattern (quitpat). Simeon Miteff <simeon.miteff@gmail.com>
+#  2013.12.19 - Version 1.5.2 - verify Windows ports w/ serial.tools.list_ports
+#   (thanks to Yegor Yefromov for the idea and code)
+#  2013.12.16 - Version 1.5.1 - Change my e-mail address
+#  2011.12.19 - Version 1.5.0 - add options for mid-line time capture
+#    (instantpat) and base time from launch of program instead of
+#    first char seen (launchtime) - contributed by Kent Borg
+#  2011-09-24 - better time output and time delta
+#    Constantine Shulyupin <const@makelinux.com>
+#  2008-06-02 - Version 1.1.0 add support for sending a command to
+#    the serial port before grabbing output
+
+import os
+import sys
+import getopt
+import serial
+import time
+import datetime
+import re
+
+try:
+    import thread
+except ImportError:
+    import _thread as thread
+
+VERSION = (1, 9, 9)
+
+
+verbose = 0         # pylint: disable=I0011,C0103
+cmdinput = u""      # pylint: disable=I0011,C0103
+
+
+def vprint(message):
+    if verbose:
+        print(verbose)
+        print(message)
+
+
+def usage(rcode):
+    cmd = "grabserial"
+
+    print("""%s : Serial line reader
+    Usage: %s [options]
+options:
+    -h, --help             Print this message
+    -d, --device=<devpath> Set the device to read (default '/dev/ttyS0')
+    -b, --baudrate=<val>   Set the baudrate (default 115200)
+    -B <val>               Force the baudrate to the indicated value
+                             (grabserial won't check if the baudrate is legal)
+    -w, --width=<val>      Set the data bit width (default 8)
+    -p, --parity=<val>     Set the parity (default N)
+    -s, --stopbits=<val>   Set the stopbits (default 1)
+    -x, --xonxoff          Enable software flow control (default off)
+    -r, --rtscts           Enable RTS/CTS flow control (default off)

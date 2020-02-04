@@ -1,0 +1,56 @@
+
+from flask import Flask,render_template,flash, redirect,url_for,session,logging,request,jsonify,Response
+import json
+import mysql.connector
+import hashlib
+import random
+import time
+import os
+from datetime import datetime
+app = Flask(__name__)
+
+@app.route("/")
+def frontpage():
+    return render_template("frontpage.html")
+@app.route("/offline")
+def offline(): 
+    return render_template("offline.html")
+
+
+@app.route("/online",methods=["GET", "POST"])
+def online():
+    if request.method == "POST":
+        graph_data = open('PERSONAL_INFO.txt','r').read()
+        lines = graph_data.split('\n')
+        xs = []
+        ys = []
+        for line in lines:
+            if len(line) > 1:
+                mydb = mysql.connector.connect(
+                host="10.14.79.58",
+                user="root",
+                passwd="12345",
+                database="PATIENT")
+
+                mycursor = mydb.cursor()
+                utype,uname,mail,phn,gender,age,passw=line.split(',')
+                hashkey=hash(uname+mail+phn)
+                PATIENT = "INSERT INTO PERSONAL_INFO (Hashkey,UserType,Name,Email,PhoneNo,Gender,Age,Password) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                val = (hashkey,utype,uname,mail,phn,gender,age,passw)
+                mycursor.execute(PATIENT, val)
+
+                mydb.commit()
+
+        open("PERSONAL_INFO.txt", "w").close()
+
+        uname = request.form["uname"]
+        passw = request.form["passw"]
+        mydb = mysql.connector.connect(
+        host="10.14.79.58",
+        user="root",
+        passwd="12345",
+        database="PATIENT")
+
+        mycursor = mydb.cursor()
+        mycursor.execute('SELECT * FROM PERSONAL_INFO WHERE Name = %s AND Password = %s', (uname, passw))
+        # Fetch one record and return result
